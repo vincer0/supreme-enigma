@@ -1,0 +1,130 @@
+services:
+  frontend:
+    container_name: shopping-list-frontend
+    build:
+      context: ./frontend
+      dockerfile: dev.Dockerfile
+    environment:
+      # Next.js API backend URL
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
+      NODE_ENV: development
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/next.config.ts:/app/next.config.ts
+      - ./frontend/tsconfig.json:/app/tsconfig.json
+      # Exclude node_modules from being overwritten
+      - /app/node_modules
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    networks:
+      - shopping_network
+    depends_on:
+      - nginx
+
+  backend:
+    container_name: shopping-list-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        WWWGROUP: ${WWWGROUP:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: ${XDEBUG_MODE:-debug,develop}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - "${FPM_APP_PORT:-9000}:9000"
+    env_file:
+      - ./backend/.env
+    environment:
+      # Override Docker-specific settings
+      DB_HOST: mariadb
+      REDIS_HOST: redis
+      XDEBUG_MODE: ${XDEBUG_MODE:-debug,develop}
+      XDEBUG_CONFIG: ${XDEBUG_CONFIG:-client_host=host.docker.internal}
+    volumes:
+      - ./backend:/var/www
+      # Exclude vendor from being overwritten
+      - /var/www/vendor
+    networks:
+      - shopping_network
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    container_name: shopping-list-nginx
+    build:
+      context: ./backend
+      dockerfile: docker/nginx/Dockerfile
+    ports:
+      - "${NGINX_APP_PORT:-8001}:80"
+    volumes:
+      - ./backend:/var/www
+    networks:
+      - shopping_network
+    depends_on:
+      - backend
+    restart: unless-stopped
+  mariadb:
+    container_name: shopping-list-mariadb
+    image: mariadb:11.7.2
+    ports:
+      - "${FORWARD_DB_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: ${DB_DATABASE:-shapp}
+      MYSQL_USER: ${DB_USERNAME:-shapp}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - shopping_network
+    healthcheck:
+      test:
+        - CMD
+        - healthcheck.sh
+        - "--connect"
+        - "--innodb_initialized"
+      retries: 3
+      timeout: 5s
+      interval: 10s
+    restart: unless-stopped
+
+  redis:
+    container_name: shopping-list-redis
+    image: redis:alpine
+    ports:
+      - "${FORWARD_REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - shopping_network
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+      interval: 10s
+    restart: unless-stopped
+
+networks:
+  shopping_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+    driver: local
+  redis_data:
+    driver: local
