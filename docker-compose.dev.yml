@@ -4,18 +4,12 @@ services:
     build:
       context: ./frontend
       dockerfile: dev.Dockerfile
-    environment:
-      # Next.js API backend URL
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api}
-      NODE_ENV: development
+    env_file:
+      - ./frontend/.env
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
-      - ./frontend/next.config.ts:/app/next.config.ts
-      - ./frontend/tsconfig.json:/app/tsconfig.json
-      # Exclude node_modules from being overwritten
-      - /app/node_modules
-    restart: unless-stopped
+    restart: always
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     networks:
