@@ -1,8 +1,8 @@
-.PHONY: up-dev
-up:
+.PHONY: updev
+updev:
 	docker-compose -f docker-compose.dev.yml up -d --build
 
-.PHONY: up-prod
-up-prod:
-	docker-compose -f docker-compose.prod.yml up -d --build
+.PHONY: ddev
+ddev:
+	docker-compose -f docker-compose.dev.yml down
 
