@@ -9,7 +9,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
-    restart: always
+    restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     networks:

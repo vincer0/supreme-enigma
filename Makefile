@@ -6,3 +6,5 @@ updev:
 ddev:
 	docker-compose -f docker-compose.dev.yml down
 
+dbash:
+	docker compose -f docker-compose.dev.yml exec backend bash
