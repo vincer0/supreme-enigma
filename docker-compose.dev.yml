@@ -66,14 +66,12 @@ services:
   mariadb:
     container_name: shopping-list-mariadb
     image: mariadb:11.7.2
+    env_file:
+      - ./backend/.env
     ports:
-      - "${FORWARD_DB_PORT:-3306}:3306"
+      - "${DB_PORT}:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
       MYSQL_ROOT_HOST: "%"
-      MYSQL_DATABASE: ${DB_DATABASE:-shapp}
-      MYSQL_USER: ${DB_USERNAME:-shapp}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     volumes:
       - mariadb_data:/var/lib/mysql
@@ -93,8 +91,10 @@ services:
   redis:
     container_name: shopping-list-redis
     image: redis:alpine
+    env_file:
+      - ./backend/.env
     ports:
-      - "${FORWARD_REDIS_PORT:-6379}:6379"
+      - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
     networks:
