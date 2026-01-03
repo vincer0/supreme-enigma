@@ -1,4 +1,4 @@
-`use server`
+'use server'
 
 const loginAction = async (initalState: LoginState, formData: FormData): Promise<LoginState> => {
     // TODO: Implement login logic here
