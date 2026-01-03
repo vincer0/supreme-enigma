@@ -1,0 +1,4 @@
+{
+    "php-cs-fixer.executablePath": "/home/pasio/laravel-pro/shopping-list/backend/vendor/bin/php-cs-fixer",
+    "php-cs-fixer.onsave": true
+}
