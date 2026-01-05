@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -17,9 +19,19 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        $user = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+        ]);
+
+        $userList = $user->lists()->create([
+            'name' => 'Groceries',
+        ]);
+
+        $userList->items()->createMany([
+            ['name' => 'Milk', 'is_completed' => false],
+            ['name' => 'Bread', 'is_completed' => true],
+            ['name' => 'Eggs', 'is_completed' => false],
         ]);
     }
 }
