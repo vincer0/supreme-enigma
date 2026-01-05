@@ -17,7 +17,7 @@ export default function Login() {
       <h1>Login Page</h1>
       <div className="p-6 bg-white rounded shadow-md">
         <form action={formAction} className="flex flex-col space-y-4">
-          <input name="username" type="text" placeholder="Username" required autoComplete="username"/>
+          <input name="email" type="text" placeholder="Email" required autoComplete="email"/>
           <input name="password" type="password" placeholder="Password" required autoComplete="current-password"/>
           <Button type="submit" disabled={pending}>Login</Button>
 					<p>{state.message}</p>

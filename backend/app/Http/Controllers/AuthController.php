@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -14,20 +13,20 @@ class AuthController extends Controller
     {
         $data = $request->validated();
 
-        $email = $data['email'];
-        $password = $data['password'];
+        if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
+            $user = Auth::user();
 
-        $user = User::where('email', $email)->first();
-
-        if (!$user || !Hash::check($password, $user->password)) {
+            // user extends Authenticatable which uses HasApiTokens trait
+            $token = $user->createToken('auth_token')->plainTextToken;
+        } else {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
+            'user' => $user,
+            'success' => true,
         ]);
     }
 
