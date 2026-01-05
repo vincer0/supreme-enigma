@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\TestController;
+use App\Http\Controllers\UserListController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 Route::middleware('auth:sanctum')->group(function () {
-    // Protected routes can be defined here, for future use.
+    Route::get('/user', fn (Request $request) => $request->user());
+    Route::resource('/user/{userId}/lists', UserListController::class)->middleware('auth:sanctum');
 });
 
 Route::post('/login', [AuthController::class, 'login']);
