@@ -25,40 +25,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials) => {
+      authorize: async (_, request) => {
+        // next-auth mirrors laravel auth state so we are getting user here only
         try {
-          await axios.get(
-            new URL("sanctum/csrf-cookie", process.env.NEXT_CSRF_URL).toString()
-          );
+          const userUrl = `${process.env.NEXT_SERVER_API_URL}/user`;
 
-          const response = await axios.post("/login", {
-            email: credentials?.email,
-            password: credentials?.password,
+          const cookie = request.headers.get("cookie") ?? "";
+
+          if (!cookie) return null;
+
+          const response = await axios.get(userUrl, {
+            headers: { cookie },
+            validateStatus: () => true, // prevent throw
           });
 
-          if (response.status === RESPONSE_STATUS_OK && response.data?.user) {
-            /*  id: 1,
-                name: 'Test User',
-                email: 'test@example.com',
-                email_verified_at: '2025-12-17T09:40:22.000000Z',
-                created_at: '2025-12-17T09:40:23.000000Z',
-                updated_at: '2025-12-17T09:40:23.000000Z' 
-            */
+          console.log("Authorize response:", response);
 
-            return {
-              ...response.data.user,
-              createdAt: new Date(response.data.user.created_at),
-            };
+          if (response.status === RESPONSE_STATUS_OK && response.data) {
+            return response.data;
           }
 
-          // If response doesn't have user data, return null (failed auth)
           return null;
         } catch (error) {
-          console.error(
-            "Authentication failed in Credentials authorize:",
-            error
-          );
-          
+          console.error("Authorize error:", error);
           return null;
         }
       },

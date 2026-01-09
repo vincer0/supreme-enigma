@@ -14,18 +14,13 @@ class AuthController extends Controller
         $data = $request->validated();
 
         if (Auth::attempt(['email' => $data['email'], 'password' => $data['password']])) {
-            $user = Auth::user();
-
-            // user extends Authenticatable which uses HasApiTokens trait
-            $token = $user->createToken('auth_token')->plainTextToken;
+            $request->session()->regenerate();
         } else {
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
         return response()->json([
-            'message' => 'Login successful',
-            'token' => $token,
-            'user' => $user,
+            'message' => 'ok',
             'success' => true,
         ]);
     }
@@ -33,5 +28,10 @@ class AuthController extends Controller
     public function register()
     {
         // Registration logic will be implemented here.
+    }
+
+    public function user()
+    {
+        return response()->json(Auth::user());
     }
 }
