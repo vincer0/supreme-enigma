@@ -1,14 +1,9 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/auth";
 
 export default async function Dashboard() {
   const session = await auth();
-
-  if (!session?.user) {
-    redirect("/login");
-  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
