@@ -1,19 +1,18 @@
 'use server'
 import { UserList, UserListItem } from '@/lib/interfaces/user-lists';
+import { cookies } from 'next/headers'
+import { SirAxios } from '@/lib/api/axios';
 
-export const fetchUserLists = async (userId: string): Promise<UserList[]> => {
-    const response = await fetch(`/api/user/${userId}/lists`, {
-        method: 'GET',
+export const fetchUserLists = async () => {
+    const baseUrl = process.env.NEXT_SERVER_API_URL;
+
+    const cookie = (await cookies());
+
+    const response = await SirAxios.get(`${baseUrl}/user/lists`, {
         headers: {
-            'Content-Type': 'application/json',
+            cookie: cookie.toString(),
         },
     });
 
-    if (!response.ok) {
-        throw new Error('Failed to fetch user lists');
-    }
-
-    const data = await response.json();
-
-    return data.lists as UserList[];
+    return response.data;
 }

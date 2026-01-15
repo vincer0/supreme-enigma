@@ -1,9 +1,13 @@
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
 import { signOut } from "@/auth";
+import { fetchUserLists } from "@/lib/actions/user-lists";
 
 export default async function Dashboard() {
   const session = await auth();
+  const lists = await fetchUserLists();
+
+  console.log("User Lists:", lists);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
@@ -13,12 +17,12 @@ export default async function Dashboard() {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium text-gray-600">Name</label>
-            <p className="text-lg">{session.user.name}</p>
+            <p className="text-lg">{session?.user.name}</p>
           </div>
           
           <div>
             <label className="text-sm font-medium text-gray-600">Email</label>
-            <p className="text-lg">{session.user.email}</p>
+            <p className="text-lg">{session?.user.email}</p>
           </div>
 
           <div className="pt-4">
@@ -35,6 +39,6 @@ export default async function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+  </div>
   );
 }
